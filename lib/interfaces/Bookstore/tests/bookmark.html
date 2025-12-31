@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agency Control Center - MarkOS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --eco-green: #7cb342;
+            --elda-red: #e53935;
+            --fed-green: #43a047;
+            --none-black: #212121;
+            --hwy-orange: #fb8c00;
+            --bg-light: #e0e0e0;
+            --card-bg: #f5f5f5;
+            --text-dark: #212121;
+            --bookmark-purple: #7b1fa2;
+            --bookmark-gold: #fdd835;
+            --bookmark-red: #e53935;
+            --bookmark-blue: #1976d2;
+            --bookmark-green: #43a047;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #37474f 0%, #263238 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        /* MAIN LAYOUT */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* LEFT SIDE - AGENCIES */
+        .agencies-panel {
+            padding: 2rem;
+            background: var(--bg-light);
+        }
+
+        .agencies-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .agencies-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .agency-tab {
+            background: white;
+            border-radius: 8px 8px 0 0;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 4px solid transparent;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .agency-tab:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .agency-tab.eco { border-bottom-color: var(--eco-green); }
+        .agency-tab.elda { border-bottom-color: var(--elda-red); }
+        .agency-tab.fed { border-bottom-color: var(--fed-green); }
+        .agency-tab.none { border-bottom-color: var(--none-black); }
+        .agency-tab.hwy { border-bottom-color: var(--hwy-orange); }
+
+        .agency-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .agency-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .agency-status {
+            font-size: 0.85rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        .status-loading { background: #ffd54f; color: #f57f17; }
+        .status-active { background: #81c784; color: #2e7d32; }
+        .status-waiting { background: #bdbdbd; color: #424242; }
+
+        .agency-action {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            opacity: 0.8;
+        }
+
+        /* WORKFLOW CARDS */
+        .workflow-cards {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .workflow-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workflow-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--eco-green);
+        }
+
+        .workflow-card.elda::before { background: var(--elda-red); }
+        .workflow-card.fed::before { background: var(--fed-green); }
+        .workflow-card.none::before { background: var(--none-black); }
+        .workflow-card.hwy::before { background: var(--hwy-orange); }
+
+        .workflow-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .workflow-state {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .workflow-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+
+        .workflow-action {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .add-btn {
+            background: none;
+            border: 2px dashed #bdbdbd;
+            color: #bdbdbd;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            height: 100%;
+        }
+
+        .add-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        /* BOOTSTRAP SECTION */
+        .bootstrap-section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .bootstrap-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bootstrap-code {
+            background: #263238;
+            color: #4caf50;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .code-comment {
+            color: #78909c;
+        }
+
+        .managers-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .manager-card {
+            background: var(--bg-light);
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            border-left: 3px solid #667eea;
+        }
+
+        /* CANVAS SECTION */
+        .canvas-section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .canvas-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .canvas-tag {
+            background: var(--bg-light);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .chat-message {
+            padding: 1rem;
+            border-radius: 8px;
+            position: relative;
+            max-width: 80%;
+            animation: messageSlideIn 0.3s ease-out;
+        }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message.user {
+            background: #e8f5e9;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .chat-message.system {
+            background: #fff3e0;
+            align-self: flex-start;
+        }
+
+        .chat-message.community {
+            background: #e3f2fd;
+            align-self: flex-start;
+        }
+
+        .chat-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .chat-time {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        /* RIGHT SIDE - BOOKMARKS */
+        .bookmarks-panel {
+            background: linear-gradient(180deg, #37474f 0%, #263238 100%);
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .bookmark-stack {
+            position: relative;
+            height: 80px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bookmark-stack:hover {
+            transform: translateX(-10px);
+        }
+
+        .bookmark {
+            position: absolute;
+            right: 0;
+            width: 100%;
+            height: 70px;
+            border-radius: 8px 0 0 8px;
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: -5px 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .bookmark-stack:hover .bookmark {
+            transform: translateX(-5px);
+        }
+
+        .bookmark::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 30px;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.2));
+        }
+
+        .bookmark.layer-1 {
+            background: var(--bookmark-purple);
+            z-index: 5;
+        }
+
+        .bookmark.layer-2 {
+            background: var(--bookmark-gold);
+            z-index: 4;
+            top: 5px;
+            right: -10px;
+        }
+
+        .bookmark.layer-3 {
+            background: var(--bookmark-red);
+            z-index: 3;
+            top: 10px;
+            right: -20px;
+        }
+
+        .bookmark.layer-4 {
+            background: var(--bookmark-blue);
+            z-index: 2;
+            top: 15px;
+            right: -30px;
+        }
+
+        .bookmark.layer-5 {
+            background: var(--bookmark-green);
+            z-index: 1;
+            top: 20px;
+            right: -40px;
+        }
+
+        /* FOOTER */
+        .footer {
+            background: #263238;
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-brand {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-link {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-link:hover {
+            opacity: 1;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1400px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .bookmarks-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .agencies-grid,
+            .workflow-cards {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .managers-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .agencies-grid,
+            .workflow-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .managers-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* LOADING ANIMATION */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* PULSE ANIMATION */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-title">
+                <button class="back-btn" onclick="goBack()">←</button>
+                <span>Agency Control Center</span>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <div style="font-size: 0.9rem; opacity: 0.8;">
+                    System: <span style="color: #4caf50; font-weight: bold;">OPERATIONAL</span>
+                </div>
+                <div style="font-size: 0.9rem; opacity: 0.8;">
+                    Keeper: <span style="color: #4caf50; font-weight: bold;">ACTIVE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <div class="main-layout">
+            <!-- LEFT SIDE: AGENCIES -->
+            <div class="agencies-panel">
+                <!-- AGENCIES HEADER -->
+                <div class="agencies-header">
+                    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">
+                        Active Agencies
+                    </div>
+                    <div style="font-size: 0.9rem; color: #666;">
+                        Manage and monitor your AI agencies in real-time
+                    </div>
+                </div>
+
+                <!-- AGENCY TABS -->
+                <div class="agencies-grid">
+                    <div class="agency-tab eco" onclick="switchAgency('eco')">
+                        <div class="agency-name">ECO</div>
+                        <div class="agency-status status-loading">LOADING</div>
+                        <div class="agency-action">Initializing...</div>
+                    </div>
+
+                    <div class="agency-tab elda active" onclick="switchAgency('elda')">
+                        <div class="agency-name">ELDA</div>
+                        <div class="agency-status status-active">ACTIVE</div>
+                        <div class="agency-action">Viewing Data</div>
+                    </div>
+
+                    <div class="agency-tab fed" onclick="switchAgency('fed')">
+                        <div class="agency-name">FED</div>
+                        <div class="agency-status status-active">ACTIVE</div>
+                        <div class="agency-action">Loading Resources</div>
+                    </div>
+
+                    <div class="agency-tab none" onclick="switchAgency('none')">
+                        <div class="agency-name">NONE</div>
+                        <div class="agency-status status-waiting">WAITING</div>
+                        <div class="agency-action">Empty Slot</div>
+                    </div>
+
+                    <div class="agency-tab hwy" onclick="switchAgency('hwy')">
+                        <div class="agency-name">HWY</div>
+                        <div class="agency-status status-active">ACTIVE</div>
+                        <div class="agency-action">Writing Reports</div>
+                    </div>
+                </div>
+
+                <!-- WORKFLOW CARDS -->
+                <div class="workflow-cards">
+                    <div class="workflow-card eco">
+                        <div class="workflow-icon">🌱</div>
+                        <div class="workflow-state">EMPTY</div>
+                        <div class="workflow-action pulse">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+
+                    <div class="workflow-card elda">
+                        <div class="workflow-icon">📊</div>
+                        <div class="workflow-state">VIEWING</div>
+                        <div class="workflow-action">Active</div>
+                    </div>
+
+                    <div class="workflow-card fed">
+                        <div class="workflow-icon">⏳</div>
+                        <div class="workflow-state">LOADING</div>
+                        <div class="workflow-action pulse">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+
+                    <div class="workflow-card none">
+                        <div class="workflow-icon">➕</div>
+                        <div class="workflow-state">EMPTY</div>
+                        <button class="add-btn" onclick="addAgency()">+</button>
+                    </div>
+
+                    <div class="workflow-card hwy">
+                        <div class="workflow-icon">✍️</div>
+                        <div class="workflow-state">WRITING</div>
+                        <div class="workflow-action">Active</div>
+                    </div>
+                </div>
+
+                <!-- BOOTSTRAP SECTION -->
+                <div class="bootstrap-section">
+                    <div class="bootstrap-title">
+                        <span>⚙️</span>
+                        <span>BookmarkOS Bootstrap</span>
+                    </div>
+                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
+                        Core system binaries for AI Autonomous Agent Environments
+                    </div>
+                    <div class="bootstrap-code">
+<span class="code-comment">#!/bin/zsh</span>
+<span class="code-comment"># BookmarkOS Bootstrap</span>
+
+<span style="color: #ffd54f;">"${BKMRK_BIN:=/sbin/bsmrk}"</span>  <span class="code-comment"># Operation Manager</span>
+<span style="color: #ffd54f;">"${PPUR_BIN:=/sbin/ppur}"</span>   <span class="code-comment"># Package Manager</span>
+<span style="color: #ffd54f;">"${KEEP_BIN:=/sbin/keep}"</span>   <span class="code-comment"># Database Manager</span>
+<span style="color: #ffd54f;">"${MARK_BIN:=/sbin/mark}"</span>   <span class="code-comment"># Quality Manager</span>
+<span style="color: #ffd54f;">"${MRKR_BIN:=/sbin/mrkr}"</span>   <span class="code-comment"># Production Manager</span>
+<span style="color: #ffd54f;">"${ZBOX_BIN:=/sbin/zbox}"</span>   <span class="code-comment"># Environment Manager</span>
+                    </div>
+
+                    <div class="managers-grid">
+                        <div class="manager-card">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">📋 Operation Manager</div>
+                            <div style="font-size: 0.85rem; color: #666;">Manages agency operations and workflows</div>
+                        </div>
+                        <div class="manager-card">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">📦 Package Manager</div>
+                            <div style="font-size: 0.85rem; color: #666;">Pick, Pull, Use, Release books</div>
+                        </div>
+                        <div class="manager-card">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">🗄️ Database Manager</div>
+                            <div style="font-size: 0.85rem; color: #666;">Keeper validates and stores MARKs</div>
+                        </div>
+                        <div class="manager-card">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">✅ Quality Manager</div>
+                            <div style="font-size: 0.85rem; color: #666;">Validates BETs and enforces rules</div>
+                        </div>
+                        <div class="manager-card">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">⚡ Production Manager</div>
+                            <div style="font-size: 0.85rem; color: #666;">Executes markers and tracks trails</div>
+                        </div>
+                        <div class="manager-card">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">🔧 Environment Manager</div>
+                            <div style="font-size: 0.85rem; color: #666;">Manages isolated agent environments</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CANVAS SECTION -->
+                <div class="canvas-section">
+                    <div class="canvas-header">
+                        <div class="canvas-title">💬 Community Canvas</div>
+                        <div class="canvas-tag">CANVAS</div>
+                    </div>
+
+                    <div class="chat-container" id="chatContainer">
+                        <div class="chat-message user">
+                            <div>
+                                <span class="chat-avatar" style="background: #4caf50;">👤</span>
+                                <strong>You</strong>
+                            </div>
+                            <div style="margin-top: 0.5rem;">
+                                I'll answer this one. My repo has all the info.
+                            </div>
+                            <div class="chat-time">Just now</div>
+                        </div>
+
+                        <div class="chat-message system">
+                            <div>
+                                <span class="chat-avatar" style="background: #ff9800;">🤖</span>
+                                <strong>System</strong>
+                            </div>
+                            <div style="margin-top: 0.5rem;">
+                                He asked this question 5 hours ago.
+                            </div>
+                            <div class="chat-time">5 hours ago</div>
+                        </div>
+
+                        <div class="chat-message community">
+                            <div>
+                                <span class="chat-avatar" style="background: #2196f3;">👥</span>
+                                <strong>Community</strong>
+                            </div>
+                            <div style="margin-top: 0.5rem;">
+                                Anyone else want to answer this one?
+                            </div>
+                            <div class="chat-time">5 hours ago</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e0e0e0;">
+                        <input type="text" id="chatInput" placeholder="Type a message to the community..." 
+                               style="width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem;"
+                               onkeypress="if(event.key === 'Enter') sendMessage()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE: BOOKMARKS -->
+            <div class="bookmarks-panel">
+                <div class="bookmark-stack" onclick="navigateTo('profile')">
+                    <div class="bookmark layer-1">
+                        <span>👤 My Profile</span>
+                    </div>
+                    <div class="bookmark layer-2"></div>
+                    <div class="bookmark layer-3"></div>
+                    <div class="bookmark layer-4"></div>
+                    <div class="bookmark layer-5"></div>
+                </div>
+
+                <div class="bookmark-stack" onclick="navigateTo('community')">
+                    <div class="bookmark layer-1" style="background: var(--bookmark-gold);">
+                        <span>👥 Community</span>
+                    </div>
+                    <div class="bookmark layer-2" style="background: var(--bookmark-red);"></div>
+                    <div class="bookmark layer-3" style="background: var(--bookmark-blue);"></div>
+                    <div class="bookmark layer-4" style="background: var(--bookmark-green);"></div>
+                    <div class="bookmark layer-5" style="background: var(--bookmark-purple);"></div>
+                </div>
+
+                <div class="bookmark-stack" onclick="navigateTo('connections')">
+                    <div class="bookmark layer-1" style="background: var(--bookmark-red);">
+                        <span>🔗 Connections</span>
+                    </div>
+                    <div class="bookmark layer-2" style="background: var(--bookmark-blue);"></div>
+                    <div class="bookmark layer-3" style="background: var(--bookmark-green);"></div>
+                    <div class="bookmark layer-4" style="background: var(--bookmark-purple);"></div>
+                    <div class="bookmark layer-5" style="background: var(--bookmark-gold);"></div>
+                </div>
+
+                <div class="bookmark-stack" onclick="navigateTo('settings')">
+                    <div class="bookmark layer-1" style="background: var(--bookmark-blue);">
+                        <span>⚙️ Settings</span>
+                    </div>
+                    <div class="bookmark layer-2" style="background: var(--bookmark-green);"></div>
+                    <div class="bookmark layer-3" style="background: var(--bookmark-purple);"></div>
+                    <div class="bookmark layer-4" style="background: var(--bookmark-gold);"></div>
+                    <div class="bookmark layer-5" style="background: var(--bookmark-red);"></div>
+                </div>
+
+                <div class="bookmark-stack" onclick="navigateTo('help')">
+                    <div class="bookmark layer-1" style="background: var(--bookmark-green);">
+                        <span>❓ Help</span>
+                    </div>
+                    <div class="bookmark layer-2" style="background: var(--bookmark-purple);"></div>
+                    <div class="bookmark layer-3" style="background: var(--bookmark-gold);"></div>
+                    <div class="bookmark layer-4" style="background: var(--bookmark-red);"></div>
+                    <div class="bookmark layer-5" style="background: var(--bookmark-blue);"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <div class="footer-brand">
+                ~ BOOKMARK STUDIO ~<br>
+                <span style="font-size: 0.85rem; opacity: 0.7;">Created By Fast&Easy Dispatching LLC</span>
+            </div>
+            <div class="footer-links">
+                <a href="#" class="footer-link">My Profile 👤</a>
+                <a href="#" class="footer-link">Community 👥</a>
+                <a href="#" class="footer-link">Connections 🔗</a>
+                <a href="#" class="footer-link">Settings ⚙️</a>
+                <a href="#" class="footer-link">Help ❓</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // STATE
+        let currentAgency = 'elda';
+        const agencies = {
+            eco: { 
+                name: 'ECO', 
+                status: 'loading', 
+                action: 'Initializing...',
+                description: 'Environmental & Ecological Monitoring Agency',
+                icon: '🌱'
+            },
+            elda: { 
+                name: 'ELDA', 
+                status: 'active', 
+                action: 'Viewing Data',
+                description: 'Elder Care & Assistance Agency',
+                icon: '👵'
+            },
+            fed: { 
+                name: 'FED', 
+                status: 'active', 
+                action: 'Loading Resources',
+                description: 'Federal Compliance & Regulatory Agency',
+                icon: '🏛️'
+            },
+            none: { 
+                name: 'NONE', 
+                status: 'waiting', 
+                action: 'Empty Slot',
+                description: 'Available Agency Slot',
+                icon: '➕'
+            },
+            hwy: { 
+                name: 'HWY', 
+                status: 'active', 
+                action: 'Writing Reports',
+                description: 'Highway Yard Dogs - Trucking Operations',
+                icon: '🚛'
+            }
+        };
+
+        // SWITCH AGENCY
+        function switchAgency(agencyId) {
+            currentAgency = agencyId;
+            
+            // Update active state
+            document.querySelectorAll('.agency-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.agency-tab').classList.add('active');
+            
+            // Add system message
+            addSystemMessage(`Switched to ${agencies[agencyId].name} agency - ${agencies[agencyId].description}`);
+            
+            // Simulate agency data loading
+            setTimeout(() => {
+                addSystemMessage(`${agencies[agencyId].name}: ${agencies[agencyId].action}`);
+            }, 500);
+        }
+
+        // ADD AGENCY
+        function addAgency() {
+            const agencyName = prompt('Enter new agency name (e.g., MEDICAL, LEGAL, FINANCE):');
+            if (agencyName) {
+                addSystemMessage(`Creating new agency: ${agencyName.toUpperCase()}`);
+                setTimeout(() => {
+                    addSystemMessage(`${agencyName.toUpperCase()} agency registered with Keeper ✓`);
+                }, 1000);
+                setTimeout(() => {
+                    addSystemMessage(`${agencyName.toUpperCase()} is now active and ready for operations`);
+                }, 2000);
+            }
+        }
+
+        // NAVIGATE TO BOOKMARK SECTION
+        function navigateTo(section) {
+            const sectionNames = {
+                'profile': 'My Profile',
+                'community': 'Community',
+                'connections': 'Connections',
+                'settings': 'Settings',
+                'help': 'Help & Documentation'
+            };
+            
+            addSystemMessage(`Navigating to ${sectionNames[section]}...`);
+            
+            // Simulate navigation
+            setTimeout(() => {
+                alert(`${sectionNames[section]} section coming soon!\n\nThis will provide:\n- User management\n- Agency connections\n- System settings\n- Community support\n- Documentation access`);
+            }, 300);
+        }
+
+        // GO BACK
+        function goBack() {
+            if (confirm('Return to MarkOS main interface?')) {
+                addSystemMessage('Returning to main interface...');
+                setTimeout(() => {
+                    window.history.back();
+                }, 500);
+            }
+        }
+
+        // SEND MESSAGE
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            // Add user message
+            const chatContainer = document.getElementById('chatContainer');
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-message user';
+            userMsg.innerHTML = `
+                <div>
+                    <span class="chat-avatar" style="background: #4caf50;">👤</span>
+                    <strong>You</strong>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    ${message}
+                </div>
+                <div class="chat-time">Just now</div>
+            `;
+            chatContainer.appendChild(userMsg);
+            
+            // Clear input
+            input.value = '';
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Simulate response
+            setTimeout(() => {
+                const systemMsg = document.createElement('div');
+                systemMsg.className = 'chat-message system';
+                systemMsg.innerHTML = `
+                    <div>
+                        <span class="chat-avatar" style="background: #ff9800;">🤖</span>
+                        <strong>System</strong>
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        Message received and processing. The Keeper is reviewing your request.
+                    </div>
+                    <div class="chat-time">Just now</div>
+                `;
+                chatContainer.appendChild(systemMsg);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 1000);
+        }
+
+        // ADD SYSTEM MESSAGE
+        function addSystemMessage(message) {
+            const chatContainer = document.getElementById('chatContainer');
+            const systemMsg = document.createElement('div');
+            systemMsg.className = 'chat-message system';
+            systemMsg.innerHTML = `
+                <div>
+                    <span class="chat-avatar" style="background: #ff9800;">🤖</span>
+                    <strong>System</strong>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    ${message}
+                </div>
+                <div class="chat-time">Just now</div>
+            `;
+            chatContainer.appendChild(systemMsg);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Keep only last 10 messages
+            const messages = chatContainer.querySelectorAll('.chat-message');
+            if (messages.length > 10) {
+                messages[0].remove();
+            }
+        }
+
+        // SIMULATE AGENCY ACTIVITY
+        function simulateAgencyActivity() {
+            const activities = [
+                { agency: 'ECO', message: 'Environmental scan complete - 3 alerts detected' },
+                { agency: 'ELDA', message: 'Medication reminder sent to 12 clients' },
+                { agency: 'FED', message: 'Compliance check: All systems operational' },
+                { agency: 'HWY', message: 'Route optimization complete for 5 Highway Yard Dogs' },
+                { agency: 'HWY', message: 'Traffic alert: I-35 congestion detected' },
+                { agency: 'ECO', message: 'Air quality index updated for monitored zones' },
+                { agency: 'ELDA', message: 'Daily wellness check initiated' },
+                { agency: 'FED', message: 'New regulation update available for review' },
+                { agency: 'HWY', message: 'Driver log book updated - 3 jobs completed today' },
+                { agency: 'Keeper', message: 'All MARKs validated - System integrity: 100%' }
+            ];
+            
+            setInterval(() => {
+                const activity = activities[Math.floor(Math.random() * activities.length)];
+                addSystemMessage(`${activity.agency}: ${activity.message}`);
+            }, 15000); // Every 15 seconds
+        }
+
+        // UPDATE AGENCY STATES
+        function updateAgencyStates() {
+            setInterval(() => {
+                // Randomly update ECO from loading to active
+                if (agencies.eco.status === 'loading' && Math.random() > 0.7) {
+                    agencies.eco.status = 'active';
+                    agencies.eco.action = 'Monitoring Environment';
+                    
+                    const ecoTab = document.querySelector('.agency-tab.eco');
+                    const statusEl = ecoTab.querySelector('.agency-status');
+                    const actionEl = ecoTab.querySelector('.agency-action');
+                    
+                    statusEl.className = 'agency-status status-active';
+                    statusEl.textContent = 'ACTIVE';
+                    actionEl.textContent = agencies.eco.action;
+                    
+                    addSystemMessage('ECO agency initialization complete ✓');
+                }
+                
+                // Rotate HWY action
+                const hwyActions = ['Writing Reports', 'Processing Routes', 'Updating Logs', 'Monitoring Traffic'];
+                const currentAction = agencies.hwy.action;
+                const newAction = hwyActions[Math.floor(Math.random() * hwyActions.length)];
+                
+                if (currentAction !== newAction) {
+                    agencies.hwy.action = newAction;
+                    const hwyTab = document.querySelector('.agency-tab.hwy');
+                    if (hwyTab) {
+                        const actionEl = hwyTab.querySelector('.agency-action');
+                        if (actionEl) {
+                            actionEl.textContent = newAction;
+                        }
+                    }
+                }
+            }, 10000); // Every 10 seconds
+        }
+
+        // WELCOME MESSAGE
+        function showWelcomeMessage() {
+            setTimeout(() => {
+                addSystemMessage('Welcome to Agency Control Center!');
+            }, 500);
+            
+            setTimeout(() => {
+                addSystemMessage('Keeper is monitoring all agencies. System status: OPERATIONAL');
+            }, 1500);
+            
+            setTimeout(() => {
+                addSystemMessage('5 agencies registered. 4 active, 1 loading, 0 violations detected.');
+            }, 2500);
+            
+            setTimeout(() => {
+                const communityMsg = document.createElement('div');
+                communityMsg.className = 'chat-message community';
+                communityMsg.innerHTML = `
+                    <div>
+                        <span class="chat-avatar" style="background: #2196f3;">👥</span>
+                        <strong>Community</strong>
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        Welcome! Need help getting started? Click the Help bookmark on the right or ask in chat.
+                    </div>
+                    <div class="chat-time">Just now</div>
+                `;
+                document.getElementById('chatContainer').appendChild(communityMsg);
+            }, 3500);
+        }
+
+        // KEYBOARD SHORTCUTS
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + Number to switch agencies
+            if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '5') {
+                e.preventDefault();
+                const agencies = ['eco', 'elda', 'fed', 'none', 'hwy'];
+                const index = parseInt(e.key) - 1;
+                if (index < agencies.length) {
+                    const tab = document.querySelector(`.agency-tab.${agencies[index]}`);
+                    if (tab) {
+                        tab.click();
+                    }
+                }
+            }
+            
+            // Escape to focus chat input
+            if (e.key === 'Escape') {
+                document.getElementById('chatInput').focus();
+            }
+        });
+
+        // INITIALIZE
+        window.addEventListener('load', () => {
+            showWelcomeMessage();
+            
+            // Start activity simulation after welcome
+            setTimeout(() => {
+                simulateAgencyActivity();
+                updateAgencyStates();
+            }, 5000);
+        });
+
+        // WORKFLOW CARD INTERACTIONS
+        document.querySelectorAll('.workflow-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (e.target.classList.contains('add-btn')) return;
+                
+                const agency = this.className.split(' ')[1];
+                if (agency && agencies[agency]) {
+                    addSystemMessage(`Viewing ${agencies[agency].name} workflow details...`);
+                    
+                    setTimeout(() => {
+                        const details = `
+${agencies[agency].name} Agency Status:
+• Status: ${agencies[agency].status.toUpperCase()}
+• Current Action: ${agencies[agency].action}
+• Description: ${agencies[agency].description}
+• BETs Validated: ✓
+• Trail Recorded: ✓
+• Keeper Approved: ✓
+                        `;
+                        alert(details);
+                    }, 300);
+                }
+            });
+        });
+
+        // BOOTSTRAP CODE INTERACTION
+        document.querySelector('.bootstrap-code').addEventListener('click', function() {
+            addSystemMessage('Bootstrap configuration displayed. All managers operational.');
+            
+            setTimeout(() => {
+                if (confirm('Would you like to view the complete bootstrap documentation?')) {
+                    addSystemMessage('Opening bootstrap documentation...');
+                    setTimeout(() => {
+                        alert('Bootstrap Documentation:\n\nThe BookmarkOS bootstrap initializes six core managers:\n\n1. Operation Manager (bsmrk) - Orchestrates agency workflows\n2. Package Manager (ppur) - Handles Pick, Pull, Use, Release\n3. Database Manager (keep) - The Keeper validates MARKs\n4. Quality Manager (mark) - Enforces BETs\n5. Production Manager (mrkr) - Executes markers\n6. Environment Manager (zbox) - Isolates agent environments\n\nAll binaries are located in /sbin/ and are available system-wide.');
+                    }, 300);
+                }
+            }, 500);
+        });
+
+        // MANAGER CARD INTERACTIONS
+        document.querySelectorAll('.manager-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const title = this.querySelector('div').textContent;
+                addSystemMessage(`Viewing ${title} details...`);
+                
+                setTimeout(() => {
+                    alert(`${title}\n\nThis manager is operational and monitoring the system.\n\nFor detailed logs and configuration, use the CLI:\n\n$ markos manager status ${title.toLowerCase().split(' ')[1]}`);
+                }, 300);
+            });
+        });
+
+        // TOOLTIP SYSTEM
+        const tooltips = {
+            'ECO': 'Environmental & Ecological Monitoring - Tracks air quality, climate data, and environmental alerts',
+            'ELDA': 'Elder Care & Assistance - Manages medication reminders, wellness checks, and care coordination',
+            'FED': 'Federal Compliance & Regulatory - Ensures DOT, OSHA, and regulatory compliance',
+            'NONE': 'Empty Agency Slot - Click to add a new specialized agency',
+            'HWY': 'Highway Yard Dogs - Manages autonomous trucking operations and driver coordination'
+        };
+
+        document.querySelectorAll('.agency-tab').forEach(tab => {
+            const agency = tab.className.split(' ')[1];
+            if (tooltips[agency.toUpperCase()]) {
+                tab.title = tooltips[agency.toUpperCase()];
+            }
+        });
+
+        // PULSE EFFECT ON LOADING STATES
+        setInterval(() => {
+            document.querySelectorAll('.pulse').forEach(el => {
+                el.style.opacity = el.style.opacity === '0.5' ? '1' : '0.5';
+            });
+        }, 1000);
+
+        // CONSOLE EASTER EGG
+        console.log(`
+╔════════════════════════════════════════╗
+║   MarkOS Agency Control Center v1.0    ║
+║   Created by Fast&Easy Dispatching LLC ║
+╚════════════════════════════════════════╝
+
+Available Commands:
+- switchAgency(id) : Switch active agency
+- addAgency()      : Register new agency
+- navigateTo(page) : Navigate to bookmark
+- agencies         : View agency data
+
+Type 'agencies' to see all registered agencies.
+
+Memory Ascending Record Keeper (MARK)
+Binary Eternal Truth (BET)
+BET Extended Actionable Truth (BEAT)
+
+Built with accountability.
+        `);
+
+        // Make agencies accessible in console
+        window.agencies = agencies;
+        window.switchAgency = switchAgency;
+        window.addAgency = addAgency;
+        window.navigateTo = navigateTo;
+    </script>
+</body>
+</html>
